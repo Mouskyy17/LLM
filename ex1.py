@@ -24,7 +24,7 @@ model = genai.GenerativeModel(
 )
 
 # URL et en-têtes pour l'API de football
-FOOTBALL_API_URL = "https://api.football-data.org/v4/players"
+FOOTBALL_API_URL = "https://api.football-data.org/v4"
 headers = {
     "X-RapidAPI-Host": "api.football-data.org",
     "X-RapidAPI-Key": os.environ["FOOTBALL_API_KEY"],
