@@ -1,3 +1,4 @@
+pip install google-generativeai
 import os
 import requests
 import streamlit as st
@@ -5,7 +6,7 @@ import google.generativeai as genai
 
 # Définir les variables d'environnement pour les clés API
 os.environ["GEMINI_API_KEY"] = "AIzaSyCqozHPzc1NRb-Xf4t6DEYTDIutFcOe_bU"
-os.environ["FOOTBALL_API_KEY"] = "734eef5ca3msh5d81108492b36d8p19753cjs"
+os.environ["FOOTBALL_API_KEY"] = "734eef5ca3msh5d81108492b36d8p19753cjsn3061c56c660b"
 
 # Configurer l'API Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
