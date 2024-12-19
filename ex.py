@@ -24,9 +24,9 @@ model = genai.GenerativeModel(
 )
 
 # URL et en-têtes pour l'API de football
-FOOTBALL_API_URL = "https://api-football-v1.p.rapidapi.com/v3/players"
+FOOTBALL_API_URL = "https://sofascore.p.rapidapi.com/matches/get-incidents?matchId=8897222"
 headers = {
-    "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com",
+    "X-RapidAPI-Host": "sofascore.p.rapidapi.com",
     "X-RapidAPI-Key": os.environ["FOOTBALL_API_KEY"],
 }
 
