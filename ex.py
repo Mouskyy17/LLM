@@ -24,7 +24,7 @@ model = genai.GenerativeModel(
 )
 
 # URL et en-têtes pour l'API de football
-FOOTBALL_API_URL = "https://api-football-v1.p.rapidapi.com/v2/odds/league/865927/bookmaker/5?page=2"
+FOOTBALL_API_URL = "https://api-football-v1.p.rapidapi.com/v3/players"
 headers = {
     "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com",
     "X-RapidAPI-Key": os.environ["FOOTBALL_API_KEY"],
@@ -53,35 +53,24 @@ def generate_response(prompt):
 
 # Interface Streamlit
 st.title("LLM sur les nominés au Ballon d'Or")
-st.markdown("Posez vos questions sur les nominés au Ballon d'Or et obtenez des réponses intelligentes !")
+st.markdown("Posez vos questions sur n'importe quel joueur et obtenez des réponses intelligentes !")
 
-# Liste des nominés
-nominees = [
-    "Lionel Messi",
-    "Erling Haaland",
-    "Kylian Mbappé",
-    "Kevin De Bruyne",
-    "Robert Lewandowski",
-    "Karim Benzema",
-    "Mohamed Salah",
-]
-
-# Sélection du joueur
-player = st.selectbox("Sélectionnez un joueur :", nominees)
+# Entrée du nom du joueur
+player_name = st.text_input("Entrez le nom d'un joueur :", placeholder="Exemple : Lionel Messi")
 
 # Entrée de question
 question = st.text_input("Posez une question :", placeholder="Exemple : Quelles sont ses statistiques cette saison ?")
 
 # Actions
 if st.button("Obtenir une réponse"):
-    if player and question:
+    if player_name and question:
         # Récupération des données du joueur
-        stats = get_player_stats(player)
+        stats = get_player_stats(player_name)
         if "error" in stats:
             st.error(stats["error"])
         else:
             # Construction du prompt
-            prompt = f"Voici les données disponibles pour {player} : {stats}. Maintenant, réponds à la question : {question}"
+            prompt = f"Voici les données disponibles pour {player_name} : {stats}. Maintenant, réponds à la question : {question}"
 
             # Génération de réponse avec Gemini
             answer = generate_response(prompt)
@@ -89,4 +78,4 @@ if st.button("Obtenir une réponse"):
             # Affichage de la réponse
             st.markdown(f"**Réponse :** {answer}")
     else:
-        st.error("Veuillez sélectionner un joueur et poser une question.")
+        st.error("Veuillez entrer un nom de joueur et poser une question.")
