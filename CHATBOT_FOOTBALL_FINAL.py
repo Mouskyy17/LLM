@@ -4,7 +4,8 @@ import google.generativeai as genai
 import streamlit as st
 from math import pi
 import matplotlib.pyplot as plt
-    
+import plotly.express as px
+
 
 # Définir la clé API Gemini
 os.environ["GEMINI_API_KEY"] = "AIzaSyCqozHPzc1NRb-Xf4t6DEYTDIutFcOe_bU"  
@@ -88,36 +89,25 @@ def get_top_scorers(league_name, position_data):
     
     return response
 
-def plot_radar_chart(player1_stats, player2_stats, player1_name, player2_name, metrics):
+def create_radar_chart(player1_stats, player2_stats, metrics, player1_name, player2_name):
     """
-    Génère un radar chart comparant les statistiques de deux joueurs.
+    Crée un radar chart pour comparer deux joueurs sur des métriques spécifiques.
     """
-    # Ajouter la première valeur à la fin pour fermer le radar
-    player1_values = [player1_stats[metric] for metric in metrics] + [player1_stats[metrics[0]]]
-    player2_values = [player2_stats[metric] for metric in metrics] + [player2_stats[metrics[0]]]
-
-    angles = [n / float(len(metrics)) * 2 * pi for n in range(len(metrics))]
-    angles += angles[:1]
-
-    # Initialiser le radar chart
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"polar": True})
-
-    # Dessiner le joueur 1
-    ax.plot(angles, player1_values, linewidth=2, linestyle="solid", label=player1_name)
-    ax.fill(angles, player1_values, alpha=0.4)
-
-    # Dessiner le joueur 2
-    ax.plot(angles, player2_values, linewidth=2, linestyle="solid", label=player2_name)
-    ax.fill(angles, player2_values, alpha=0.4)
-
-    # Ajouter les étiquettes des catégories
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(metrics)
-
-    # Légende
-    plt.legend(loc="upper right", bbox_to_anchor=(0.1, 0.1))
-
-    st.pyplot(fig)
+    radar_data = {
+        "Metric": metrics,
+        player1_name: [player1_stats[metric] for metric in metrics],
+        player2_name: [player2_stats[metric] for metric in metrics],
+    }
+    
+    df_radar = pd.DataFrame(radar_data)
+    fig = px.line_polar(
+        df_radar,
+        r=radar_data[player1_name] + radar_data[player2_name],
+        theta=radar_data["Metric"] * 2,
+        line_close=True,
+        title=f"Comparaison entre {player1_name} et {player2_name}",
+    )
+    return fig
 
 # Fonction pour comparer deux joueurs
 def compare_players(player_name1, player_name2, position_data):
@@ -192,30 +182,36 @@ elif action == "Comparer deux joueurs":
     player1 = st.text_input("Entrez le premier joueur :")
     player2 = st.text_input("Entrez le deuxième joueur :")
     
+    # Définir les colonnes pertinentes selon la position
     if position == "Attaquants":
         data = attaquants
+        metrics = ["Buts", "Passes decisives", "Tirs cadrés", "Dribbles réussis", "xG"]  # xG = Expected Goals
     elif position == "Milieux":
         data = milieux
+        metrics = ["Passes décisives", "Buts", "Passes progressives", "Duels gagnés", "Passes clés"]
     elif position == "Défenseurs":
         data = defenseurs
+        metrics = ["Tacles réussis", "Interceptions", "Duels gagnés", "Dégagements", "Blocs"]
 
     if st.button("Comparer les joueurs"):
         if player1 and player2:
+            # Extraire les données des joueurs
             player_data1 = data[data['Joueur'].str.contains(player1, case=False)]
             player_data2 = data[data['Joueur'].str.contains(player2, case=False)]
             
             if player_data1.empty or player_data2.empty:
                 st.error("Un ou les deux joueurs n'ont pas été trouvés.")
             else:
-                # Extraire les statistiques des joueurs
                 stats1 = player_data1.iloc[0]
                 stats2 = player_data2.iloc[0]
-
-                # Déterminer automatiquement les métriques pertinentes (en excluant certaines colonnes non numériques ou non pertinentes)
-                metrics = [col for col in data.columns if col not in ['Joueur', 'Ligue'] and data[col].dtype in ['int64', 'float64']]
-
-                # Générer le radar chart
-                plot_radar_chart(stats1, stats2, stats1['Joueur'], stats2['Joueur'], metrics)
+                
+                # Comparaison textuelle
+                comparison = compare_players(player1, player2, data)
+                st.text_area("Comparaison des joueurs", comparison, height=200)
+                
+                # Afficher le radar chart
+                fig = create_radar_chart(stats1, stats2, metrics, player1, player2)
+                st.plotly_chart(fig, use_container_width=True)
         else:
             st.error("Veuillez entrer les noms des deux joueurs.")
 
