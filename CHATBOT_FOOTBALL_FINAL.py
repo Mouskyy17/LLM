@@ -224,8 +224,8 @@ elif action == "Comparer deux joueurs":
     if st.button("Comparer les joueurs"):
         if player1 and player2:
             # Extraire les données des joueurs
-            player_data1 = data[data['Player'].str.contains(player1, case=False)]
-            player_data2 = data[data['Player'].str.contains(player2, case=False)]
+            player_data1 = data[data['Joueur'].str.contains(player1, case=False)]
+            player_data2 = data[data['Joueur'].str.contains(player2, case=False)]
             
             if player_data1.empty or player_data2.empty:
                 st.error("Un ou les deux joueurs n'ont pas été trouvés.")
