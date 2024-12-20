@@ -197,11 +197,6 @@ elif action == "Comparer deux joueurs":
     player1 = st.text_input("Entrez le premier joueur :")
     player2 = st.text_input("Entrez le deuxième joueur :")
     
-    if action == "Comparer deux joueurs":
-        position = st.radio("Sélectionnez la position des joueurs", ("Attaquants", "Milieux", "Défenseurs"))
-        player1 = st.text_input("Entrez le premier joueur :")
-        player2 = st.text_input("Entrez le deuxième joueur :")
-    
     if position == "Attaquants":
         data = attaquants
         metrics = ["Buts", "Passes decisives", "Tirs", "Dribbles réussis", "xG"]
@@ -225,6 +220,7 @@ elif action == "Comparer deux joueurs":
                 plot_radar_chart(stats1, stats2, player1, player2, metrics)
         else:
             st.error("Veuillez entrer les noms des deux joueurs.")
+
 # Question générale avec Gemini
 if action == "Question générale":
     st.markdown("**Note**: Veuillez poser uniquement des questions liées au football.")
