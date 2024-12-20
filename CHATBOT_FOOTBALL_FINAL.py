@@ -92,16 +92,11 @@ def plot_radar_chart(player1_stats, player2_stats, player1_name, player2_name, m
     """
     Génère un radar chart comparant les statistiques de deux joueurs.
     """
-    # Préparer les données
-    categories = metrics
-    player1_values = [player1_stats[metric] for metric in metrics]
-    player2_values = [player2_stats[metric] for metric in metrics]
-
     # Ajouter la première valeur à la fin pour fermer le radar
-    player1_values += player1_values[:1]
-    player2_values += player2_values[:1]
+    player1_values = [player1_stats[metric] for metric in metrics] + [player1_stats[metrics[0]]]
+    player2_values = [player2_stats[metric] for metric in metrics] + [player2_stats[metrics[0]]]
 
-    angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
+    angles = [n / float(len(metrics)) * 2 * pi for n in range(len(metrics))]
     angles += angles[:1]
 
     # Initialiser le radar chart
@@ -117,7 +112,7 @@ def plot_radar_chart(player1_stats, player2_stats, player1_name, player2_name, m
 
     # Ajouter les étiquettes des catégories
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(categories)
+    ax.set_xticklabels(metrics)
 
     # Légende
     plt.legend(loc="upper right", bbox_to_anchor=(0.1, 0.1))
@@ -199,13 +194,10 @@ elif action == "Comparer deux joueurs":
     
     if position == "Attaquants":
         data = attaquants
-        metrics = ["Buts", "Passes decisives", "Tirs", "Dribbles réussis", "xG"]
     elif position == "Milieux":
         data = milieux
-        metrics = ["Passes decisives", "Buts", "Passes réussies", "Interceptions", "xA"]
     elif position == "Défenseurs":
         data = defenseurs
-        metrics = ["Tacles reussis", "Interceptions", "Duels aeriens", "Passes réussies", "Dégagements"]
 
     if st.button("Comparer les joueurs"):
         if player1 and player2:
@@ -215,9 +207,15 @@ elif action == "Comparer deux joueurs":
             if player_data1.empty or player_data2.empty:
                 st.error("Un ou les deux joueurs n'ont pas été trouvés.")
             else:
+                # Extraire les statistiques des joueurs
                 stats1 = player_data1.iloc[0]
                 stats2 = player_data2.iloc[0]
-                plot_radar_chart(stats1, stats2, player1, player2, metrics)
+
+                # Déterminer automatiquement les métriques pertinentes (en excluant certaines colonnes non numériques ou non pertinentes)
+                metrics = [col for col in data.columns if col not in ['Joueur', 'Ligue'] and data[col].dtype in ['int64', 'float64']]
+
+                # Générer le radar chart
+                plot_radar_chart(stats1, stats2, stats1['Joueur'], stats2['Joueur'], metrics)
         else:
             st.error("Veuillez entrer les noms des deux joueurs.")
 
