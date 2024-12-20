@@ -85,6 +85,42 @@ def get_top_scorers(league_name, position_data):
     
     return response
 
+def plot_radar_chart(player1_stats, player2_stats, player1_name, player2_name, metrics):
+    """
+    Génère un radar chart comparant les statistiques de deux joueurs.
+    """
+    # Préparer les données
+    categories = metrics
+    player1_values = [player1_stats[metric] for metric in metrics]
+    player2_values = [player2_stats[metric] for metric in metrics]
+
+    # Ajouter la première valeur à la fin pour fermer le radar
+    player1_values += player1_values[:1]
+    player2_values += player2_values[:1]
+
+    angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
+    angles += angles[:1]
+
+    # Initialiser le radar chart
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"polar": True})
+
+    # Dessiner le joueur 1
+    ax.plot(angles, player1_values, linewidth=2, linestyle="solid", label=player1_name)
+    ax.fill(angles, player1_values, alpha=0.4)
+
+    # Dessiner le joueur 2
+    ax.plot(angles, player2_values, linewidth=2, linestyle="solid", label=player2_name)
+    ax.fill(angles, player2_values, alpha=0.4)
+
+    # Ajouter les étiquettes des catégories
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories)
+
+    # Légende
+    plt.legend(loc="upper right", bbox_to_anchor=(0.1, 0.1))
+
+    st.pyplot(fig)
+
 # Fonction pour comparer deux joueurs
 def compare_players(player_name1, player_name2, position_data):
     player_data1 = position_data[position_data['Joueur'].str.contains(player_name1, case=False)]
@@ -153,25 +189,34 @@ elif action == "Meilleurs buteurs":
         else:
             st.error("Veuillez entrer le nom d'une ligue.")
 
-elif action == "Comparer deux joueurs":
-    position = st.radio("Sélectionnez la position des joueurs", ("Attaquants", "Milieux", "Défenseurs"))
-    player1 = st.text_input("Entrez le premier joueur :")
-    player2 = st.text_input("Entrez le deuxième joueur :")
+    elif action == "Comparer deux joueurs":
+        position = st.radio("Sélectionnez la position des joueurs", ("Attaquants", "Milieux", "Défenseurs"))
+        player1 = st.text_input("Entrez le premier joueur :")
+        player2 = st.text_input("Entrez le deuxième joueur :")
     
     if position == "Attaquants":
         data = attaquants
+        metrics = ["Buts", "Passes decisives", "Tirs", "Dribbles réussis", "xG"]
     elif position == "Milieux":
         data = milieux
+        metrics = ["Passes decisives", "Buts", "Passes réussies", "Interceptions", "xA"]
     elif position == "Défenseurs":
         data = defenseurs
-    
+        metrics = ["Tacles reussis", "Interceptions", "Duels aeriens", "Passes réussies", "Dégagements"]
+
     if st.button("Comparer les joueurs"):
         if player1 and player2:
-            comparison = compare_players(player1, player2, data)
-            st.text_area("Comparaison des joueurs", comparison, height=200)
+            player_data1 = data[data['Joueur'].str.contains(player1, case=False)]
+            player_data2 = data[data['Joueur'].str.contains(player2, case=False)]
+            
+            if player_data1.empty or player_data2.empty:
+                st.error("Un ou les deux joueurs n'ont pas été trouvés.")
+            else:
+                stats1 = player_data1.iloc[0]
+                stats2 = player_data2.iloc[0]
+                plot_radar_chart(stats1, stats2, player1, player2, metrics)
         else:
             st.error("Veuillez entrer les noms des deux joueurs.")
-
 # Question générale avec Gemini
 if action == "Question générale":
     st.markdown("**Note**: Veuillez poser uniquement des questions liées au football.")
