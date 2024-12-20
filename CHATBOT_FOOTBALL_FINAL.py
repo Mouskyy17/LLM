@@ -134,6 +134,38 @@ def compare_players(player_name1, player_name2, position_data):
     
     return comparison
 
+def select_metrics(position):
+    """
+    Sélectionne 5 colonnes pertinentes pour un radar chart en fonction de la position.
+    """
+    if position == "Attaquants":
+        return [
+            "Performance Gls",          # Buts
+            "Performance Ast",          # Passes décisives
+            "Expected xG",              # Buts attendus
+            "Standard SoT%",            # Pourcentage de tirs cadrés
+            "Take-Ons Succ%",           # Dribbles réussis en pourcentage
+        ]
+    elif position == "Milieux":
+        return [
+            "Performance Ast",          # Passes décisives
+            "Progression PrgP",         # Passes progressives
+            "Expected xAG",             # Passes décisives attendues
+            "Touches Mid 3rd",          # Touches dans le tiers central
+            "Carries PrgDist",          # Distance de progression en conduite
+        ]
+    elif position == "Défenseurs":
+        return [
+            "Tackles Tkl",              # Tacles
+            "Blocks Blocks",            # Blocs
+            "Performance Int",          # Interceptions
+            "Carries PrgDist",          # Distance de progression en conduite
+            "Aerial Duels Won%",        # Pourcentage de duels aériens gagnés
+        ]
+    else:
+        raise ValueError("Position inconnue.")
+
+
 # Interface Streamlit
 st.title("Assistant Football avec Gemini")
 st.markdown("Posez vos questions sur le football et obtenez des réponses intelligentes grâce à Gemini !")
@@ -182,22 +214,18 @@ elif action == "Comparer deux joueurs":
     player1 = st.text_input("Entrez le premier joueur :")
     player2 = st.text_input("Entrez le deuxième joueur :")
     
-    # Définir les colonnes pertinentes selon la position
     if position == "Attaquants":
         data = attaquants
-        metrics = ["Buts", "Passes decisives", "Tirs cadrés", "Dribbles réussis", "xG"]  # xG = Expected Goals
     elif position == "Milieux":
         data = milieux
-        metrics = ["Passes décisives", "Buts", "Passes progressives", "Duels gagnés", "Passes clés"]
     elif position == "Défenseurs":
         data = defenseurs
-        metrics = ["Tacles réussis", "Interceptions", "Duels gagnés", "Dégagements", "Blocs"]
-
+    
     if st.button("Comparer les joueurs"):
         if player1 and player2:
             # Extraire les données des joueurs
-            player_data1 = data[data['Joueur'].str.contains(player1, case=False)]
-            player_data2 = data[data['Joueur'].str.contains(player2, case=False)]
+            player_data1 = data[data['Player'].str.contains(player1, case=False)]
+            player_data2 = data[data['Player'].str.contains(player2, case=False)]
             
             if player_data1.empty or player_data2.empty:
                 st.error("Un ou les deux joueurs n'ont pas été trouvés.")
@@ -205,9 +233,13 @@ elif action == "Comparer deux joueurs":
                 stats1 = player_data1.iloc[0]
                 stats2 = player_data2.iloc[0]
                 
+                # Sélectionner les métriques pertinentes
+                metrics = select_metrics(position)
+                
                 # Comparaison textuelle
-                comparison = compare_players(player1, player2, data)
-                st.text_area("Comparaison des joueurs", comparison, height=200)
+                st.markdown(f"### Comparaison entre {player1} et {player2}")
+                for metric in metrics:
+                    st.write(f"{metric}: {stats1[metric]} vs {stats2[metric]}")
                 
                 # Afficher le radar chart
                 fig = create_radar_chart(stats1, stats2, metrics, player1, player2)
