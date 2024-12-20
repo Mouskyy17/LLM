@@ -4,7 +4,7 @@ import google.generativeai as genai
 import streamlit as st
 from math import pi
 import matplotlib.pyplot as plt
-
+    
 
 # Définir la clé API Gemini
 os.environ["GEMINI_API_KEY"] = "AIzaSyCqozHPzc1NRb-Xf4t6DEYTDIutFcOe_bU"  
