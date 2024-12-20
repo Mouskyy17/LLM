@@ -2,8 +2,9 @@ import os
 import pandas as pd
 import google.generativeai as genai
 import streamlit as st
-import matplotlib.pyplot as plt
 from math import pi
+import matplotlib.pyplot as plt
+
 
 # Définir la clé API Gemini
 os.environ["GEMINI_API_KEY"] = "AIzaSyCqozHPzc1NRb-Xf4t6DEYTDIutFcOe_bU"  
@@ -196,6 +197,11 @@ elif action == "Comparer deux joueurs":
     player1 = st.text_input("Entrez le premier joueur :")
     player2 = st.text_input("Entrez le deuxième joueur :")
     
+    if action == "Comparer deux joueurs":
+        position = st.radio("Sélectionnez la position des joueurs", ("Attaquants", "Milieux", "Défenseurs"))
+        player1 = st.text_input("Entrez le premier joueur :")
+        player2 = st.text_input("Entrez le deuxième joueur :")
+    
     if position == "Attaquants":
         data = attaquants
         metrics = ["Buts", "Passes decisives", "Tirs", "Dribbles réussis", "xG"]
@@ -205,7 +211,7 @@ elif action == "Comparer deux joueurs":
     elif position == "Défenseurs":
         data = defenseurs
         metrics = ["Tacles reussis", "Interceptions", "Duels aeriens", "Passes réussies", "Dégagements"]
-    
+
     if st.button("Comparer les joueurs"):
         if player1 and player2:
             player_data1 = data[data['Joueur'].str.contains(player1, case=False)]
@@ -219,7 +225,6 @@ elif action == "Comparer deux joueurs":
                 plot_radar_chart(stats1, stats2, player1, player2, metrics)
         else:
             st.error("Veuillez entrer les noms des deux joueurs.")
-
 # Question générale avec Gemini
 if action == "Question générale":
     st.markdown("**Note**: Veuillez poser uniquement des questions liées au football.")
